@@ -13,8 +13,10 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+    csvplot.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += \
+    csvplot.h
 
-FORMS    += mainwindow.ui
+FORMS    += \
+    CsvPlot.ui
