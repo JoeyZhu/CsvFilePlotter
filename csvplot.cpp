@@ -1,22 +1,23 @@
-#include "csvplot.h"
-#include "ui_CsvPlot.h"
+#include <QWidget>
 #include <QFile>
 #include <QTextStream>
 #include <QPainter>
 
+#include "csvplot.h"
+
 //constructor for CsvPlot class
 CsvPlot::CsvPlot(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::CsvPlot)     //TODO: don't know what is ui
+    QWidget(parent)
 {
-    ui->setupUi(this);
+    setBackgroundRole(QPalette::Dark);
+    setAutoFillBackground(true);
+
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setFocusPolicy(Qt::StrongFocus);    //TODO: what's StrongFocus?
+
     xScale = 1;
     yScale = 1;
     loadTextFile();
-}
-
-CsvPlot::~CsvPlot(){
-    delete ui;
 }
 
 void CsvPlot::loadTextFile(){

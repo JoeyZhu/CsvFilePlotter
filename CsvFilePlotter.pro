@@ -18,8 +18,7 @@ SOURCES += main.cpp\
 HEADERS  += \
     csvplot.h
 
-FORMS    += \
-    CsvPlot.ui
+FORMS    +=
 
 RESOURCES += \
     CsvRes.qrc
