@@ -11,10 +11,8 @@ CsvPlot::CsvPlot(QWidget *parent) :
 {
     setBackgroundRole(QPalette::Dark);
     setAutoFillBackground(true);
-
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::StrongFocus);    //TODO: what's StrongFocus?
-
     xScale = 1;
     yScale = 1;
     loadTextFile();
