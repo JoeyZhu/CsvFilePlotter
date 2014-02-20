@@ -1,0 +1,14 @@
+[core]
+	repositoryformatversion = 0
+	filemode = false
+	bare = false
+	logallrefupdates = true
+	symlinks = false
+	ignorecase = true
+	hideDotFiles = dotGitOnly
+[remote "github_orgin"]
+	url = git@github.com:cfpl/CsvFilePlotter.git
+	fetch = +refs/heads/*:refs/remotes/github_orgin/*
+[gui]
+	wmstate = normal
+	geometry = 799x475+539+271 182 214
