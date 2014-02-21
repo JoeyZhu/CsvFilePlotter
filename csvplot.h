@@ -5,10 +5,14 @@
 #include <QPixmap>
 
 class QToolButton;
+class QLabel;
 class PlotSettings;     //save each zoom stage setting
 
 #define INPUT_ARRAY_ROWS 7200       // TODO: change to const, const命名规范是啥？
-
+#define Y_MAX 2800
+#define Y_MIN 1000
+#define OVER_POWER_TH 2500
+#define TARGET_COLUMNS 1
 
 class CsvPlot : public QWidget
 {
@@ -25,19 +29,24 @@ signals:
 public slots:
     void zoomIn();
     void zoomOut();
+    void open();
 
 protected:
     void paintEvent(QPaintEvent *);
     void resizeEvent(QResizeEvent *event);
 
 private:
-    void loadTextFile();
+    void loadTextFile(const QString &fileName, int i);
     void drawGrid(QPainter *painter);
     void drawCurve(QPainter *painter);
     void refreshPixmap();   //TODO: what's Pixmap?
+    void csvPlotInit();
     QToolButton *zoomInButton;
     QToolButton *zoomOutButton;
+    QToolButton *openFileButton;
     QPixmap pixmap;
+
+    QLabel *infoLabel;
 
     enum { Margin = 50 };   //no plot area
 
@@ -51,7 +60,15 @@ private:
     double xScale;
     double yScale;
 
+    int powerTH;
+    int DataPNumPre;
+    int powerOverCount;
+
+    int maxCurve;
+    long maxCurveIndex;
+    int maxCurveFileIndex;
 };
+
 
 class PlotSettings{
 public:
@@ -69,16 +86,3 @@ public:
 };
 
 #endif // CSVPLOT_H
-
-
-
-
-
-
-
-
-
-
-
-
-

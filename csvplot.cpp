@@ -4,6 +4,9 @@
 #include <QPainter>
 #include <QToolButton>
 #include <QStylePainter>
+#include <QLabel>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "csvplot.h"
 
@@ -26,21 +29,37 @@ CsvPlot::CsvPlot(QWidget *parent) :
     zoomOutButton->adjustSize();
     connect(zoomOutButton, SIGNAL(clicked()), this, SLOT(zoomOut()));
 
+    openFileButton = new QToolButton(this);
+    openFileButton->setText(tr("打开文件"));
+    openFileButton->adjustSize();
+    connect(openFileButton, SIGNAL(clicked()), this, SLOT(open()));
+
+    infoLabel = new QLabel(this);
+    infoLabel->setFixedWidth(400);
+    infoLabel->setText(tr("Please Load Files"));
+
     setPlotSettings(PlotSettings());
 
+    csvPlotInit();
+}
+
+void CsvPlot::csvPlotInit(){
     xScale = 1;
     yScale = 1;
-    dataMin = 0;//-100;
-    dataMax = 700;
-    loadTextFile();
+    dataMin = Y_MIN;
+    dataMax = Y_MAX;
+    powerTH = OVER_POWER_TH;
+    powerOverCount = 0;
+    maxCurve = 0;
+    maxCurveIndex = 0;
+    maxCurveFileIndex = 0;
 }
 
 void CsvPlot::setPlotSettings(const PlotSettings &settings){
     zoomStack.clear();
     zoomStack.append(settings);
     zoomStage = 0;
-//    zoomInButton->hide();
-//    zoomOutButton->hide();
+
     //need refresh?
     //refreshPixmap();
 }
@@ -65,16 +84,38 @@ void CsvPlot::zoomOut(){
     refreshPixmap();
 }
 
+void CsvPlot::open(){
+    csvPlotInit();
+
+    QStringList filenames = QFileDialog::getOpenFileNames(this);
+    if(!filenames.isEmpty()){
+        for(int i = 0; i < filenames.count(); i++){
+            loadTextFile(filenames.at(i), i);
+        }
+        //infoLabel->setText(filename.at(0)+filename.at(1));
+        //infoLabel->adjustSize();
+    }
+}
+
 void CsvPlot::resizeEvent(QResizeEvent *){
-    int x = width() - (zoomInButton->width() + zoomOutButton->width() + 10);
+    int x = width() - (zoomInButton->width());
     zoomInButton->move(x,5);
-    zoomOutButton->move(x + zoomInButton->width() + 5, 5);
+    x -= zoomInButton->width() + 5;
+    zoomOutButton->move(x, 5);
+    x -= openFileButton->width() + 5;
+    openFileButton->move(x, 5);
     refreshPixmap();
 }
 
-void CsvPlot::loadTextFile(){
-    QFile inputFile(":/input.txt");
-    inputFile.open(QIODevice::ReadOnly);
+void CsvPlot::loadTextFile(const QString &filename, int ithFile){
+    QFile inputFile(filename);
+    if(!inputFile.open(QFile::ReadOnly)){
+        QMessageBox::warning(this, tr("Files"),
+                             tr("Cannot read file %1:\n%2.")
+                             .arg(filename)
+                             .arg(inputFile.errorString()));
+        return;
+    }
     QTextStream in(&inputFile);
 
     QStringList list;
@@ -86,11 +127,27 @@ void CsvPlot::loadTextFile(){
         list = oneLine.split(",", QString::SkipEmptyParts);
 
         if((i > 0)&&(i < INPUT_ARRAY_ROWS)){
-            DataPNum[i] = list.at(4).toInt();
+            DataPNum[i] = list.at(TARGET_COLUMNS).toInt();
+            if((DataPNum[i] > powerTH) && (DataPNumPre < powerTH)){
+                powerOverCount++;
+            }
+            DataPNumPre = DataPNum[i];
+            if(DataPNum[i] > maxCurve){
+                maxCurve = DataPNum[i];
+                maxCurveIndex = i + ithFile * INPUT_ARRAY_ROWS;
+            }
+
         }
         i++;
     }
     inputFile.close();
+
+    infoLabel->setText(tr("超过") + QString::number(powerTH)
+                       + tr("的次数为") + QString::number(powerOverCount)
+                       + "\n" + tr("最大值为") + QString::number((maxCurve))
+                       + tr("。序号是") + QString::number(maxCurveIndex));
+    infoLabel->adjustSize();
+    refreshPixmap();
 }
 
 void CsvPlot::paintEvent(QPaintEvent */*event*/){
