@@ -46,7 +46,8 @@ private:
 
     int DataPNum[INPUT_ARRAY_ROWS];
 
-
+    double dataMin;
+    double dataMax;
     double xScale;
     double yScale;
 
